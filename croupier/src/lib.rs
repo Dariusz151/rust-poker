@@ -6,6 +6,14 @@ use rand::thread_rng;
 const CARDS_AMOUNT: usize = 52;
 const STARTING_MONEY: u32 = 15000;
 
+
+#[derive(Debug, Copy, Clone)]
+pub enum Decision{
+    Bet(Result<u32, & 'static str>),
+    Pass,
+    Check
+}
+
 #[derive(Debug, PartialEq, Copy, Clone, IntoEnumIterator)]
 enum Suit {
     Clubs,
@@ -116,7 +124,7 @@ impl Croupier {
             }
             else{
                 println!("Cards have been dealt.");
-            } ;
+            }
         };
     }
 }
@@ -126,6 +134,7 @@ pub struct Player {
     name: String,
     hand: Option<(Card,Card)>,
     money: u32,
+    actual_decision: Decision
 }
 
 impl Player {
@@ -135,7 +144,8 @@ impl Player {
         Player {
             name,
             hand: None,
-            money: STARTING_MONEY
+            money: STARTING_MONEY,
+            actual_decision: Decision::Check
         }
     }
 
@@ -149,18 +159,33 @@ impl Player {
         }
     }
 
-    pub fn bet(&mut self, cash_amount: u32)
-    {
+    pub fn bet(&mut self, cash_amount: u32) -> Decision {
         println!("{} is beting {} dollars.", self.name, cash_amount);
-        if cash_amount < self.money
-        {
+        if cash_amount < self.money {
             self.money -= cash_amount;
-            // TODO: add this cash_amount to game pot.
+            self.actual_decision = Decision::Bet(Ok(cash_amount));
         }
-        else
-        {
-            panic!("Can't bet more money than you have.");
+        else {
+            self.actual_decision = Decision::Bet(Err("Can't bet more money than you have!"));
         }
+        let decision: Decision = self.actual_decision;
+
+        decision
+    }
+
+    pub fn check(&mut self) -> Decision {
+        
+        self.actual_decision = Decision::Check;
+        let decision: Decision = self.actual_decision;
+
+        decision
+    }
+
+    pub fn pass(&mut self) -> Decision {
+        self.actual_decision = Decision::Pass;
+        let decision: Decision = self.actual_decision;
+
+        decision
     }
 }
 
@@ -205,16 +230,36 @@ mod tests {
     }
 
     #[test]
+    #[ignore]
     fn bet_less_than_have_should_subtract_from_players_money() {
-        let mut player: Player = Player::new(String::from("Mateusz"));   
-        player.bet(10000);
-        assert_eq!(player.money, 5000);
+        let mut player: Player = Player::new(String::from("Mateusz")); 
+        let amount: u32 = STARTING_MONEY - 2000;
+        let result: Decision = player.bet(amount).unwrap();
+
+        assert_eq!(player.money, 2000);
+        assert_eq!(result, Decision::Bet(Ok(amount)));
     }
 
     #[test]
-    #[should_panic]
-    fn bet_more_than_have_should_panic() {
+    #[ignore]
+    fn bet_more_than_have_should_err() {
         let mut player: Player = Player::new(String::from("Mateusz"));
-        player.bet(20000);
+        assert!(player.bet(STARTING_MONEY + 2000).is_err());
+    }
+
+    #[test]
+    #[ignore]
+    fn check_should_return_actual_state_check() {
+        let mut player: Player = Player::new(String::from("Mateusz"));
+        player.check();
+        assert_eq!(player.actual_state, Decision::Check);
+    }
+
+    #[test]
+    #[ignore]
+    fn pass_should_return_actual_state_pass() {
+        let mut player: Player = Player::new(String::from("Mateusz"));
+        player.pass();
+        assert_eq!(player.actual_state, Decision::Pass);
     }
 }
