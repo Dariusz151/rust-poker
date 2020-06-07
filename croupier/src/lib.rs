@@ -8,7 +8,7 @@ const STARTING_MONEY: u32 = 15000;
 
 
 #[derive(Debug, Copy, Clone)]
-pub enum Decision{
+pub enum Decision {
     Bet(Result<u32, & 'static str>),
     Pass,
     Check
@@ -136,7 +136,7 @@ impl Player {
         }
     }
 
-    pub fn bet(&mut self, cash_amount: u32) -> Decision {
+    pub fn bet(&mut self, cash_amount: u32) {
         println!("{} is beting {} dollars.", self.name, cash_amount);
         if cash_amount < self.money {
             self.money -= cash_amount;
@@ -146,21 +146,18 @@ impl Player {
             self.actual_decision = Decision::Bet(Err("Can't bet more money than you have!"));
 
         }
-        let decision: Decision = self.actual_decision;
-
-        decision
     }
 
-    pub fn check(&mut self) -> Decision {
+    pub fn check(&mut self) {
         
         self.actual_decision = Decision::Check;
-        let decision: Decision = self.actual_decision;
-
-        decision
     }
 
-    pub fn pass(&mut self) -> Decision {
+    pub fn pass(&mut self) {
         self.actual_decision = Decision::Pass;
+    }
+
+    pub fn check_decision(&self) -> Decision {
         let decision: Decision = self.actual_decision;
 
         decision
