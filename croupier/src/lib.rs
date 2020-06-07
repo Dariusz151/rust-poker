@@ -4,7 +4,7 @@ use rand::thread_rng;
 
 #[allow(dead_code)]
 const CARDS_AMOUNT: usize = 52;
-const STARTING_MONEY: i32 = 15000;
+const STARTING_MONEY: u32 = 15000;
 
 #[derive(Debug, PartialEq, Copy, Clone, IntoEnumIterator)]
 enum Suit {
@@ -98,7 +98,7 @@ impl Croupier {
 pub struct Player {
     name: String,
     hand: Option<(Card,Card)>,
-    money: i32,
+    money: u32,
 }
 
 impl Player {
@@ -116,8 +116,23 @@ impl Player {
         if let Some((first, second)) = &self.hand {
             println!("First card: {:?} Second card: {:?}", first, second);
         }
-        else{
+        else
+        {
             panic!("Could not show the cards");
+        }
+    }
+
+    pub fn bet(&mut self, cash_amount: u32)
+    {
+        println!("{} is beting {} dollars.", self.name, cash_amount);
+        if cash_amount < self.money
+        {
+            self.money -= cash_amount;
+            // TODO: add this cash_amount to game pot.
+        }
+        else
+        {
+            panic!("Can't bet more money than you have.");
         }
     }
 }
@@ -143,7 +158,7 @@ mod tests {
     #[test]
     fn shuffling_cards() {
         // arrange
-        let deck_original: Deck = Deck::new();;
+        let deck_original: Deck = Deck::new();
         let mut deck_cloned: Deck = deck_original.clone();
         // act
         Croupier::shuffle_cards(&mut deck_cloned);
@@ -151,7 +166,6 @@ mod tests {
         assert_ne!(deck_original, deck_cloned);
     }
 
-    
     #[test]
     fn take_card() {
         // arrange
@@ -161,5 +175,19 @@ mod tests {
         let _last_card: Card = deck.take_card();
         // assert
         assert_eq!(deck_len - 1, deck.cards.len());
+    }
+
+    #[test]
+    fn bet_less_than_have_should_subtract_from_players_money() {
+        let mut player: Player = Player::new(String::from("Mateusz"));   
+        player.bet(10000);
+        assert_eq!(player.money, 5000);
+    }
+
+    #[test]
+    #[should_panic]
+    fn bet_more_than_have_should_panic() {
+        let mut player: Player = Player::new(String::from("Mateusz"));
+        player.bet(20000);
     }
 }
