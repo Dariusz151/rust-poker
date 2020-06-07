@@ -66,6 +66,33 @@ impl Deck {
 }
 
 #[derive(Debug)]
+pub struct Table {
+    flop: Option<(Card, Card, Card)>,
+    turn: Option <Card>,
+    river: Option <Card>,
+    pot: u32,
+}
+
+impl Table {
+    pub fn new() -> Table {
+        
+        Table {
+            flop: None,
+            turn: None,
+            river: None,
+            pot: 0,
+        }
+    }
+
+    pub fn clean_table(&mut self) {
+        self.flop = None;
+        self.turn = None;
+        self.river = None;
+        self.pot = 0;
+    }
+}
+
+#[derive(Debug)]
 pub struct Croupier {
     name: String,
 }
@@ -143,7 +170,7 @@ mod tests {
     #[test]
     fn shuffling_cards() {
         // arrange
-        let deck_original: Deck = Deck::new();;
+        let deck_original: Deck = Deck::new();
         let mut deck_cloned: Deck = deck_original.clone();
         // act
         Croupier::shuffle_cards(&mut deck_cloned);
