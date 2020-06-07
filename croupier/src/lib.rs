@@ -63,7 +63,7 @@ impl Deck {
         Deck { cards }
     }
 
-    fn take_card(&mut self) -> Card {
+    pub fn take_card(&mut self) -> Card {
         if let Some(c) = self.cards.pop() {
             c
         }
@@ -92,7 +92,14 @@ impl Table {
         }
     }
 
-    pub fn clean_table(&mut self) {
+    pub fn is_clean(&self) -> bool {
+        self.flop == None &&
+        self.flop == None &&
+        self.flop == None &&
+        self.pot == 0
+    }
+
+    pub fn clean(&mut self) {
         self.flop = None;
         self.turn = None;
         self.river = None;
@@ -100,36 +107,6 @@ impl Table {
     }
 }
 
-#[derive(Debug)]
-pub struct Croupier {
-    name: String,
-}
-
-impl Croupier {
-    pub fn new(name: String) -> Croupier {
-        println!("{} [Croupier] entered the poker.", name);
-        
-        Croupier { name }
-    }
-
-    pub fn shuffle_cards(deck: &mut Deck) {
-        println!("Cards have been shuffled.");
-        deck.cards.shuffle(&mut thread_rng());
-    }
-
-    pub fn deal_cards(players: &mut Vec<Player>, deck: &mut Deck){
-        for p in players{
-            if let None = p.hand {
-                p.hand = Some((deck.take_card(), deck.take_card()));
-            }
-            else{
-                println!("Cards have been dealt.");
-            }
-        };
-    }
-}
-
-#[derive(Debug)]
 pub struct Player {
     name: String,
     hand: Option<(Card,Card)>,
@@ -167,6 +144,7 @@ impl Player {
         }
         else {
             self.actual_decision = Decision::Bet(Err("Can't bet more money than you have!"));
+
         }
         let decision: Decision = self.actual_decision;
 
@@ -189,6 +167,53 @@ impl Player {
     }
 }
 
+#[derive(Debug)]
+pub struct Croupier {
+    name: String,
+}
+
+impl Croupier {
+    pub fn new(name: String) -> Croupier {
+        println!("{} [Croupier] entered the poker.", name);
+        
+        Croupier { name }
+    }
+
+    pub fn shuffle_cards(deck: &mut Deck) {
+        println!("Cards have been shuffled.");
+        deck.cards.shuffle(&mut thread_rng());
+    }
+
+    pub fn deal_cards(deck: &mut Deck, players: &mut Vec<Player>, table: &mut Table){
+        // Deal cards for players
+        for p in players{
+            if let None = p.hand {
+                p.hand = Some((deck.take_card(), deck.take_card()));
+            }
+            else{
+                println!("Cards have been dealt.");
+            };
+        };
+        // Deal cards for table
+        if table.is_clean() {
+            table.flop = Some((deck.take_card(), deck.take_card(), deck.take_card()));
+            table.turn = Some(deck.take_card());
+            table.river = Some(deck.take_card());
+        }
+    }
+
+    pub fn new_deck() -> Deck {
+        Deck::new()
+    }
+
+    pub fn new_table() -> Table {
+        Table::new()
+    }
+
+    pub fn clean_table(table: &mut Table) {
+        table.clean();
+    }
+}
 
 /*
 ** TESTS
@@ -199,15 +224,6 @@ mod tests {
     use super::*;
 
     #[test]
-    fn create_new_deck() {
-        // arrange
-        // act
-        let deck = Deck::new();
-        // assert
-        assert_eq!(deck.cards.len(), CARDS_AMOUNT);
-    }
-
-    #[test]
     fn shuffling_cards() {
         // arrange
         let deck_original: Deck = Deck::new();
@@ -216,6 +232,15 @@ mod tests {
         Croupier::shuffle_cards(&mut deck_cloned);
         // assert
         assert_ne!(deck_original, deck_cloned);
+    }
+    
+    #[test]
+    fn create_new_deck() {
+        // arrange
+        // act
+        let deck = Deck::new();
+        // assert
+        assert_eq!(deck.cards.len(), CARDS_AMOUNT);
     }
 
     #[test]
@@ -229,37 +254,37 @@ mod tests {
         assert_eq!(deck_len - 1, deck.cards.len());
     }
 
-    #[test]
-    #[ignore]
-    fn bet_less_than_have_should_subtract_from_players_money() {
-        let mut player: Player = Player::new(String::from("Mateusz")); 
-        let amount: u32 = STARTING_MONEY - 2000;
-        let result: Decision = player.bet(amount).unwrap();
+    // #[test]
+    // #[ignore]
+    // fn bet_less_than_have_should_subtract_from_players_money() {
+    //     let mut player: Player = Player::new(String::from("Mateusz")); 
+    //     let amount: u32 = STARTING_MONEY - 2000;
+    //     let result: Decision = player.bet(amount).unwrap();
 
-        assert_eq!(player.money, 2000);
-        assert_eq!(result, Decision::Bet(Ok(amount)));
-    }
+    //     assert_eq!(player.money, 2000);
+    //     assert_eq!(result, Decision::Bet(Ok(amount)));
+    // }
 
-    #[test]
-    #[ignore]
-    fn bet_more_than_have_should_err() {
-        let mut player: Player = Player::new(String::from("Mateusz"));
-        assert!(player.bet(STARTING_MONEY + 2000).is_err());
-    }
+    // #[test]
+    // #[ignore]
+    // fn bet_more_than_have_should_err() {
+    //     let mut player: Player = Player::new(String::from("Mateusz"));
+    //     assert!(player.bet(STARTING_MONEY + 2000).is_err());
+    // }
 
-    #[test]
-    #[ignore]
-    fn check_should_return_actual_state_check() {
-        let mut player: Player = Player::new(String::from("Mateusz"));
-        player.check();
-        assert_eq!(player.actual_state, Decision::Check);
-    }
+    // #[test]
+    // #[ignore]
+    // fn check_should_return_actual_state_check() {
+    //     let mut player: Player = Player::new(String::from("Mateusz"));
+    //     player.check();
+    //     assert_eq!(player.actual_state, Decision::Check);
+    // }
 
-    #[test]
-    #[ignore]
-    fn pass_should_return_actual_state_pass() {
-        let mut player: Player = Player::new(String::from("Mateusz"));
-        player.pass();
-        assert_eq!(player.actual_state, Decision::Pass);
-    }
+    // #[test]
+    // #[ignore]
+    // fn pass_should_return_actual_state_pass() {
+    //     let mut player: Player = Player::new(String::from("Mateusz"));
+    //     player.pass();
+    //     assert_eq!(player.actual_state, Decision::Pass);
+    // }
 }
