@@ -144,12 +144,10 @@ impl Player {
         }
         else {
             self.actual_decision = Decision::Bet(Err("Can't bet more money than you have!"));
-
         }
     }
 
     pub fn check(&mut self) {
-        
         self.actual_decision = Decision::Check;
     }
 
