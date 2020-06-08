@@ -6,12 +6,11 @@ use rand::thread_rng;
 const CARDS_AMOUNT: usize = 52;
 const STARTING_MONEY: u32 = 15000;
 
-
 #[derive(Debug, Copy, Clone)]
 pub enum Decision {
-    Bet(Result<u32, & 'static str>),
+    Bet(Result<u32, &'static str>),
     Pass,
-    Check
+    Check,
 }
 
 #[derive(Debug, PartialEq, Copy, Clone, IntoEnumIterator)]
@@ -19,7 +18,7 @@ enum Suit {
     Clubs,
     Diamonds,
     Hearts,
-    Spades
+    Spades,
 }
 
 #[derive(Debug, PartialEq, Copy, Clone, IntoEnumIterator)]
@@ -42,7 +41,7 @@ enum Figure {
 #[derive(Debug, PartialEq, Clone)]
 pub struct Card {
     suit: Suit,
-    figure: Figure
+    figure: Figure,
 }
 
 #[derive(Debug, PartialEq, Clone)]
@@ -55,7 +54,10 @@ impl Deck {
         let mut cards: Vec<Card> = Vec::new();
         for suit in Suit::into_enum_iter() {
             for figure in Figure::into_enum_iter() {
-                let card = Card {suit: *(&suit), figure: *(&figure)};
+                let card = Card {
+                    suit: *(&suit),
+                    figure: *(&figure),
+                };
                 cards.push(card);
             }
         }
@@ -66,8 +68,7 @@ impl Deck {
     pub fn take_card(&mut self) -> Card {
         if let Some(c) = self.cards.pop() {
             c
-        }
-        else{
+        } else {
             panic!("Could not take card from deck!");
         }
     }
@@ -76,14 +77,13 @@ impl Deck {
 #[derive(Debug)]
 pub struct Table {
     flop: Option<(Card, Card, Card)>,
-    turn: Option <Card>,
-    river: Option <Card>,
+    turn: Option<Card>,
+    river: Option<Card>,
     pot: u32,
 }
 
 impl Table {
     pub fn new() -> Table {
-        
         Table {
             flop: None,
             turn: None,
@@ -93,10 +93,7 @@ impl Table {
     }
 
     pub fn is_clean(&self) -> bool {
-        self.flop == None &&
-        self.flop == None &&
-        self.flop == None &&
-        self.pot == 0
+        self.flop == None && self.flop == None && self.flop == None && self.pot == 0
     }
 
     pub fn clean(&mut self) {
@@ -105,13 +102,19 @@ impl Table {
         self.river = None;
         self.pot = 0;
     }
+
+    pub fn set_pot(&mut self, cash_to_pot: u32) {
+        self.pot += cash_to_pot;
+    }
 }
 
+#[derive(Debug, Clone)]
 pub struct Player {
-    name: String,
-    hand: Option<(Card,Card)>,
+    pub name: String,
+    hand: Option<(Card, Card)>,
     money: u32,
-    actual_decision: Decision
+    is_player_turn: bool,
+    actual_decision: Decision,
 }
 
 impl Player {
@@ -122,16 +125,15 @@ impl Player {
             name,
             hand: None,
             money: STARTING_MONEY,
-            actual_decision: Decision::Check
+            is_player_turn: false,
+            actual_decision: Decision::Check,
         }
     }
 
-    pub fn show_cards(&self){
+    pub fn show_cards(&self) {
         if let Some((first, second)) = &self.hand {
-            println!("First card: {:?} Second card: {:?}", first, second);
-        }
-        else
-        {
+            println!("First card: {:?} \nSecond card: {:?}", first, second);
+        } else {
             panic!("Could not show the cards");
         }
     }
@@ -141,8 +143,7 @@ impl Player {
         if cash_amount < self.money {
             self.money -= cash_amount;
             self.actual_decision = Decision::Bet(Ok(cash_amount));
-        }
-        else {
+        } else {
             self.actual_decision = Decision::Bet(Err("Can't bet more money than you have!"));
         }
     }
@@ -170,8 +171,11 @@ pub struct Croupier {
 impl Croupier {
     pub fn new(name: String) -> Croupier {
         println!("{} [Croupier] entered the poker.", name);
-        
         Croupier { name }
+    }
+
+    pub fn new_deck() -> Deck {
+        Deck::new()
     }
 
     pub fn shuffle_cards(deck: &mut Deck) {
@@ -179,16 +183,16 @@ impl Croupier {
         deck.cards.shuffle(&mut thread_rng());
     }
 
-    pub fn deal_cards(deck: &mut Deck, players: &mut Vec<Player>, table: &mut Table){
+    pub fn deal_cards(deck: &mut Deck, players: &mut Vec<Player>, table: &mut Table) {
         // Deal cards for players
-        for p in players{
+        for p in players {
             if let None = p.hand {
                 p.hand = Some((deck.take_card(), deck.take_card()));
-            }
-            else{
-                println!("Cards have been dealt.");
+                println!("Croupier dealt cards to {}.", p.name);
+            } else {
+                println!("Cards have already been dealt.");
             };
-        };
+        }
         // Deal cards for table
         if table.is_clean() {
             table.flop = Some((deck.take_card(), deck.take_card(), deck.take_card()));
@@ -196,17 +200,48 @@ impl Croupier {
             table.river = Some(deck.take_card());
         }
     }
+}
 
-    pub fn new_deck() -> Deck {
-        Deck::new()
+#[derive(Debug)]
+pub struct Round {
+    pub table: Table,
+    pub players: Option<Vec<Player>>,
+    pub players_turn_index: usize,
+    pub round_number: u32,
+}
+
+impl Round {
+    pub fn new() -> Round {
+        let table: Table = Round::new_table();
+
+        Round {
+            table: table,
+            players: None,
+            players_turn_index: 0,
+            round_number: 0,
+        }
     }
 
     pub fn new_table() -> Table {
         Table::new()
     }
 
-    pub fn clean_table(table: &mut Table) {
-        table.clean();
+    pub fn clean_table(&mut self) {
+        self.table.clean();
+    }
+
+    pub fn add_players(&mut self, players: Vec<Player>) {
+        self.players = Some(players);
+    }
+
+    pub fn start_round(&mut self, round_number: &mut u32) {
+        if let Some(players) = &mut self.players {
+            players[self.players_turn_index].is_player_turn = true;
+            self.round_number = *round_number;
+            println!("Starting round: {}", self.round_number);
+        } else {
+            println!("There is no players in this round.");
+        }
     }
 }
 
@@ -228,7 +263,6 @@ mod tests {
         // assert
         assert_ne!(deck_original, deck_cloned);
     }
-    
     #[test]
     fn create_new_deck() {
         // arrange
@@ -252,7 +286,7 @@ mod tests {
     // #[test]
     // #[ignore]
     // fn bet_less_than_have_should_subtract_from_players_money() {
-    //     let mut player: Player = Player::new(String::from("Mateusz")); 
+    //     let mut player: Player = Player::new(String::from("Mateusz"));
     //     let amount: u32 = STARTING_MONEY - 2000;
     //     let result: Decision = player.bet(amount).unwrap();
 
