@@ -20,7 +20,7 @@ fn main() {
 
     'outer: loop {
         round.start_round(&mut round_number);
-        let mut turn_index = round.players_turn_index;
+        let mut turn_index = 0;
 
         'inner: loop {
             let mut guess = String::new();
@@ -51,6 +51,7 @@ fn main() {
                     turn_index += 1;
                     if turn_index > players_count - 1 {
                         round_number += 1;
+                        Croupier::show_cards(&mut round.table, &mut round_number);
                         if round_number > 3 {
                             break 'outer;
                         }
