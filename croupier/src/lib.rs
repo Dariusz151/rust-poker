@@ -113,7 +113,6 @@ pub struct Player {
     pub name: String,
     hand: Option<(Card, Card)>,
     money: u32,
-    is_player_turn: bool,
     actual_decision: Decision,
 }
 
@@ -125,7 +124,6 @@ impl Player {
             name,
             hand: None,
             money: STARTING_MONEY,
-            is_player_turn: false,
             actual_decision: Decision::Check,
         }
     }
@@ -200,14 +198,22 @@ impl Croupier {
             table.river = Some(deck.take_card());
         }
     }
+
+    pub fn show_cards(table: &mut Table, round_number: &mut u32) {
+        match round_number {
+            0 => println!("Nothing to show."),
+            1 => println!("Flop: {:?}", table.flop),
+            2 => println!("Turn: {:?}", table.turn),
+            3 => println!("River: {:?}", table.river),
+            _ => println!("Round ended."),
+        };
+    }
 }
 
 #[derive(Debug)]
 pub struct Round {
     pub table: Table,
     pub players: Option<Vec<Player>>,
-    pub players_turn_index: usize,
-    pub round_number: u32,
 }
 
 impl Round {
@@ -217,8 +223,6 @@ impl Round {
         Round {
             table: table,
             players: None,
-            players_turn_index: 0,
-            round_number: 0,
         }
     }
 
@@ -236,9 +240,7 @@ impl Round {
 
     pub fn start_round(&mut self, round_number: &mut u32) {
         if let Some(players) = &mut self.players {
-            players[self.players_turn_index].is_player_turn = true;
-            self.round_number = *round_number;
-            println!("Starting round: {}", self.round_number);
+            println!("Starting new round.");
         } else {
             println!("There is no players in this round.");
         }
