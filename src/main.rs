@@ -1,4 +1,10 @@
-use croupier::{Croupier, Decision, Deck, Player, Round};
+mod utils;
+
+use crate::utils::round::Round;
+use crate::utils::player::Player;
+use crate::utils::croupier::Croupier;
+use crate::utils::deck::Deck;
+use crate::utils::player::Decision;
 
 use std::io;
 
