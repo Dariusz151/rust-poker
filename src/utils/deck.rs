@@ -25,6 +25,10 @@ impl Deck {
         Deck { cards }
     }
 
+    pub fn clean(&mut self) {
+        self.cards = vec![];
+    }
+
     pub fn take_card(&mut self) -> Card {
         if let Some(c) = self.cards.pop() {
             c

@@ -6,6 +6,7 @@ pub struct Table {
     pub turn: Option<Card>,
     pub river: Option<Card>,
     pub pot: u32,
+    pub to_call: u32,
 }
 
 impl Table {
@@ -15,6 +16,7 @@ impl Table {
             turn: None,
             river: None,
             pot: 0,
+            to_call: 0,
         }
     }
 
@@ -28,7 +30,7 @@ impl Table {
         self.river = None;
         self.pot = 0;
     }
-
+    #[allow(dead_code)]
     pub fn set_pot(&mut self, cash_to_pot: u32) {
         self.pot += cash_to_pot;
     }

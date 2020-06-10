@@ -30,3 +30,4 @@ pub struct Card {
     pub suit: Suit,
     pub figure: Figure,
 }
+// TODO: implement Display
