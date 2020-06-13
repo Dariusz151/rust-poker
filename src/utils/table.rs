@@ -1,4 +1,5 @@
 use crate::utils::card::Card;
+use crate::utils::player::Player;
 
 #[derive(Debug)]
 pub struct Table {
@@ -29,9 +30,18 @@ impl Table {
         self.turn = None;
         self.river = None;
         self.pot = 0;
+        self.to_call = 0;
     }
-    #[allow(dead_code)]
+
     pub fn set_pot(&mut self, cash_to_pot: u32) {
         self.pot += cash_to_pot;
+    }
+
+    pub fn compare_cards<'a>(&mut self, players: &'a mut Vec<&'a mut Player>) -> &'a mut Player {
+        players.pop().unwrap() // only for return purpose
+    }
+
+    pub fn collect_reward(&mut self, player: &mut Player) {
+        player.money = self.pot;
     }
 }

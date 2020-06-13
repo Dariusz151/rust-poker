@@ -6,16 +6,16 @@
 mod tests {
     use super::*;
 
-    // #[test]
-    // fn shuffling_cards() {
-    //     // arrange
-    //     let deck_original: Deck = Deck::new();
-    //     let mut deck_cloned: Deck = deck_original.clone();
-    //     // act
-    //     Croupier::shuffle_cards(&mut deck_cloned);
-    //     // assert
-    //     assert_ne!(deck_original, deck_cloned);
-    // }
+    #[test]
+    fn shuffling_cards() {
+        // arrange
+        let deck_original: Deck = Deck::new();
+        let mut deck_cloned: Deck = deck_original.clone();
+        // act
+        Croupier::shuffle_cards(&mut deck_cloned);
+        // assert
+        assert_ne!(deck_original, deck_cloned);
+    }
     // #[test]
     // fn create_new_deck() {
     //     // arrange
