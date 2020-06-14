@@ -1,7 +1,24 @@
 use enum_iterator::IntoEnumIterator;
 use std::fmt;
 
-#[derive(Debug, PartialEq, Copy, Clone, IntoEnumIterator)]
+// trait Dedup<T: PartialEq + Clone> {
+//     fn clear_duplicates(&mut self);
+// }
+
+// impl<T: PartialEq + Clone> Dedup<T> for Vec<T> {
+//     fn clear_duplicates(&mut self) {
+//         let mut already_seen = vec![];
+//         self.retain(|item| match already_seen.contains(item) {
+//             true => false,
+//             _ => {
+//                 already_seen.push(item.clone());
+//                 true
+//             }
+//         })
+//     }
+// }
+
+#[derive(Debug, Copy, Clone, IntoEnumIterator, PartialEq, PartialOrd)]
 pub enum Suit {
     Clubs,
     Diamonds,
@@ -9,24 +26,24 @@ pub enum Suit {
     Spades,
 }
 
-#[derive(Debug, PartialEq, Copy, Clone, IntoEnumIterator)]
+#[derive(Debug, Copy, Clone, IntoEnumIterator, Eq, Ord, PartialEq, PartialOrd)]
 pub enum Figure {
-    Ace,
-    Two,
-    Three,
-    Four,
-    Five,
-    Six,
-    Seven,
-    Eight,
-    Nine,
-    Ten,
-    Jack,
-    Queen,
-    King,
+    Ace = 14,
+    Two = 2,
+    Three = 3,
+    Four = 4,
+    Five = 5,
+    Six = 6,
+    Seven = 7,
+    Eight = 8,
+    Nine = 9,
+    Ten = 10,
+    Jack = 11,
+    Queen = 12,
+    King = 13,
 }
 
-#[derive(Debug, PartialEq, Clone)]
+#[derive(Debug, Clone, PartialEq, PartialOrd)]
 pub struct Card {
     pub suit: Suit,
     pub figure: Figure,

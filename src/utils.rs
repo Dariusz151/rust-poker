@@ -5,3 +5,4 @@ pub mod player;
 pub mod table;
 pub mod round;
 pub mod util;
+pub mod hands;

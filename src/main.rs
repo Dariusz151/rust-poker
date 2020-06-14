@@ -3,6 +3,9 @@ mod utils;
 use crate::utils::game::Game;
 use crate::utils::util::*;
 
+use crate::utils::hands::*;
+use crate::utils::card::*;
+
 fn main() {
     println!("Hello in Poker Rust! \nWould you like to start? Y / N");
     match read_line().trim() {
