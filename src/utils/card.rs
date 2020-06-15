@@ -1,20 +1,21 @@
 use enum_iterator::IntoEnumIterator;
 use std::fmt;
 
-// trait Dedup<T: PartialEq + Clone> {
+// trait Dedup {
 //     fn clear_duplicates(&mut self);
 // }
 
-// impl<T: PartialEq + Clone> Dedup<T> for Vec<T> {
+// impl Dedup for Vec<Figure> {
 //     fn clear_duplicates(&mut self) {
-//         let mut already_seen = vec![];
-//         self.retain(|item| match already_seen.contains(item) {
-//             true => false,
-//             _ => {
-//                 already_seen.push(item.clone());
-//                 true
-//             }
-//         })
+//         println!("siema");
+//         // let mut already_seen = vec![];
+//         // self.retain(|item| match already_seen.contains(item) {
+//         //     true => false,
+//         //     _ => {
+//         //         already_seen.push(item.clone());
+//         //         true
+//         //     }
+//         // })
 //     }
 // }
 
